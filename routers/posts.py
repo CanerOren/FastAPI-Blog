@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("", response_model=list[PostResponse])
 async def get_posts(db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
-        select(models.Post).options(selectinload(models.Post.author))
+        select(models.Post).options(selectinload(models.Post.author)).order_by(models.Post.date_posted.desc()),
     )
     posts = result.scalars().all()
     return posts
@@ -85,7 +85,7 @@ async def update_post_full(
     post.user_id = post_data.user_id
 
     await db.commit()
-    await db.refresh(post)
+    await db.refresh(post, attribute_names=["author"])
     return post
 
 
@@ -107,7 +107,7 @@ async def update_post_partial(
         setattr(post, field, value)
 
     await db.commit()
-    await db.refresh(post)
+    await db.refresh(post, attribute_names=["author"])
     return post
 
 
