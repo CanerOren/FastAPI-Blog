@@ -9,6 +9,8 @@ import models
 from database import AsyncSessionLocal, engine
 from image_utils import PROFILE_PICS_DIR
 from main import app
+import selectors
+import sys
 
 POPULATE_IMAGES_DIR = Path("populate_images")
 
@@ -381,4 +383,10 @@ async def populate() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(populate())
+    if sys.platform.startswith("win"):
+        asyncio.run(
+            populate(),
+            loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector()),
+        )
+    else:
+        asyncio.run(populate())

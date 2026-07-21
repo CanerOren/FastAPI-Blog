@@ -21,16 +21,20 @@ class User(Base):
         default=None,
     )
 
-    posts: Mapped[list[Post]] = relationship(back_populates="author", cascade="all, delete-orphan")
+    posts: Mapped[list[Post]] = relationship(
+        back_populates="author", cascade="all, delete-orphan"
+    )
 
-    reset_tokens: Mapped[list[PasswordResetToken]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    reset_tokens: Mapped[list[PasswordResetToken]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
     @property
     def image_path(self) -> str:
         if self.image_file:
             return f"/media/profile_pics/{self.image_file}"
         return "/static/profile_pics/default.jpg"
-    
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -47,6 +51,7 @@ class Post(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
+    likes: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     author: Mapped[User] = relationship(back_populates="posts")
 
@@ -58,8 +63,7 @@ class PasswordResetToken(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False
+        DateTime(timezone=True), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

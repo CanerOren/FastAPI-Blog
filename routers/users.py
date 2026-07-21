@@ -150,9 +150,7 @@ async def forgot_password(
         )
 
         reset_token = models.PasswordResetToken(
-            user_id=user.id,
-            token_hash=token_hash,
-            expires_at=expires_at
+            user_id=user.id, token_hash=token_hash, expires_at=expires_at
         )
         db.add(reset_token)
         await db.commit()
@@ -171,8 +169,7 @@ async def forgot_password(
 
 @router.post("/reset-password", status_code=status.HTTP_200_OK)
 async def reset_password(
-    request_data: ResetPasswordRequest,
-    db: Annotated[AsyncSession, Depends(get_db)]
+    request_data: ResetPasswordRequest, db: Annotated[AsyncSession, Depends(get_db)]
 ):
     token_hash = hash_reset_token(request_data.token)
 
@@ -182,21 +179,21 @@ async def reset_password(
         ),
     )
     reset_token = result.scalars().first()
-    
+
     if not reset_token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired reset token",
         )
-    
-    if reset_token.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
+
+    if reset_token.expires_at < datetime.now(UTC):
         await db.delete(reset_token)
         await db.commit()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired reset token",
         )
-    
+
     result = await db.execute(
         select(models.User).where(models.User.id == reset_token.user_id),
     )
@@ -207,7 +204,7 @@ async def reset_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired reset token",
         )
-    
+
     user.password_hash = hash_password(request_data.new_password)
 
     await db.execute(
@@ -226,14 +223,14 @@ async def reset_password(
 async def change_password(
     password_data: ChangePasswordRequest,
     current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     if not verify_password(password_data.current_password, current_user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect",
         )
-    
+
     current_user.password_hash = hash_password(password_data.new_password)
 
     await db.execute(
