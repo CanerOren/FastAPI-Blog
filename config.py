@@ -33,5 +33,7 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:8000"
 
+    sentry_dsn: SecretStr | None = None
+
 
 settings = Settings()  # type: ignore[call-arg] # Loaded from .env file

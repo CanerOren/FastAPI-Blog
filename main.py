@@ -14,6 +14,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StartletteHTTPException
+import sentry_sdk
 
 import models
 from config import settings
@@ -27,6 +28,11 @@ async def lifespan(_app: FastAPI):
     # Shutdown
     await engine.dispose()
 
+
+sentry_sdk.init(
+    dsn=settings.sentry_dsn.get_secret_value() if settings.sentry_dsn else None,
+    send_default_pii=True,
+)
 
 app = FastAPI(lifespan=lifespan)
 

@@ -442,6 +442,7 @@ dependencies = [
     { name = "pwdlib", extra = ["argon2"] },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
+    { name = "sentry-sdk" },
     { name = "sqlalchemy" },
 ]
 
@@ -464,6 +465,7 @@ requires-dist = [
     { name = "pwdlib", extras = ["argon2"], specifier = ">=0.3.0" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
     { name = "pyjwt", specifier = ">=2.11.0" },
+    { name = "sentry-sdk", specifier = ">=2.50.0" },
     { name = "sqlalchemy", specifier = ">=2.0.46" },
 ]
 
