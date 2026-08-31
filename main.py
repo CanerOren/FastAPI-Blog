@@ -53,6 +53,7 @@ async def health_check(db: Annotated[AsyncSession, Depends(get_db)]):
 # HTTP Template Enpoints
 @app.get("/", include_in_schema=False, name="home")
 @app.get("/posts", include_in_schema=False, name="posts")
+@app.head("/")
 async def home(request: Request, db: Annotated[AsyncSession, Depends(get_db)]):
     count_result = await db.execute(select(func.count()).select_from(models.Post))
     total = count_result.scalar() or 0
