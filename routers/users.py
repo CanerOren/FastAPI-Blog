@@ -17,6 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.concurrency import run_in_threadpool
+from fastapi_cache.decorator import cache
 
 from sqlalchemy import delete as sql_delete
 
@@ -250,6 +251,7 @@ async def change_password(
 
 
 @router.get("/{user_id}", response_model=UserPublic)
+@cache(expire=300)
 async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
@@ -259,6 +261,7 @@ async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
 
 
 @router.get("/{user_id}/posts", response_model=PaginatedPostsResponse)
+@cache(expire=60)
 async def get_user_posts(
     user_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],

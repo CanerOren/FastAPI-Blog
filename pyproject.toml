@@ -9,6 +9,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "alembic>=1.18.4",
     "boto3>=1.43.40",
+    "fastapi-cache2>=0.2.2",
     "fastapi[standard]>=0.128.0",
     "greenlet>=3.3.1",
     "pillow>=12.1.1",
@@ -16,6 +17,7 @@ dependencies = [
     "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.11.0",
+    "redis>=8.1.0",
     "sentry-sdk>=2.50.0",
     "sqlalchemy>=2.0.46",
 ]

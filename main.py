@@ -15,6 +15,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StartletteHTTPException
 import sentry_sdk
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+from redis import asyncio as aioredis
 
 import models
 from config import settings
@@ -24,6 +28,9 @@ from routers import posts, users
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    # Startup
+    redis = aioredis.from_url("redis://localhost")
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
     # Shutdown
     await engine.dispose()
