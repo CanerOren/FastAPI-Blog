@@ -95,6 +95,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
 @router.post("/token", response_model=Token)
 @limiter.limit("5/minute")
 async def login_for_access_token(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
@@ -134,6 +135,7 @@ async def get_current_user(current_user: CurrentUser):
 @router.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 @limiter.limit("3/minute")
 async def forgot_password(
+    request: Request,
     request_data: ForgotPasswordRequest,
     background_tasks: BackgroundTasks,
     db: Annotated[AsyncSession, Depends(get_db)],
