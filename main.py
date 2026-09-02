@@ -19,11 +19,14 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import asyncio as aioredis
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 import models
 from config import settings
 from database import engine, get_db
 from routers import posts, users
+from limiter import limiter
 
 
 @asynccontextmanager
@@ -42,6 +45,9 @@ sentry_sdk.init(
 )
 
 app = FastAPI(lifespan=lifespan)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

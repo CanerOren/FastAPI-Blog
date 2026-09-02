@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.concurrency import run_in_threadpool
 from fastapi_cache.decorator import cache
-
+from fastapi import Request
 from sqlalchemy import delete as sql_delete
 
 import models
@@ -50,7 +50,7 @@ from schemas import (
     ChangePasswordRequest,
     ResetPasswordRequest,
 )
-
+from limiter import limiter
 
 router = APIRouter()
 
@@ -93,6 +93,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
 
 
 @router.post("/token", response_model=Token)
+@limiter.limit("5/minute")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -131,6 +132,7 @@ async def get_current_user(current_user: CurrentUser):
 
 
 @router.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
+@limiter.limit("3/minute")
 async def forgot_password(
     request_data: ForgotPasswordRequest,
     background_tasks: BackgroundTasks,
