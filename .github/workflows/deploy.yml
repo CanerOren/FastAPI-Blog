@@ -17,6 +17,6 @@ jobs:
           script: |
             cd /var/www/fastapi-blog
             git pull
-            uv sync
-            uv run alembic upgrade head
+            /home/caneroren/.local/bin/uv sync
+            /home/caneroren/.local/bin/uv run alembic upgrade head
             sudo systemctl restart fastapi-blog
