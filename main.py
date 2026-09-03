@@ -279,6 +279,18 @@ async def sitemap(db: Annotated[AsyncSession, Depends(get_db)]):
     return Response(content=xml, media_type="application/xml")
 
 
+@app.get("/robots.txt", include_in_schema=False)
+async def robots():
+    content = f"""User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /docs
+Disallow: /redoc
+
+Sitemap: {settings.frontend_url}/sitemap.xml"""
+    return Response(content=content, media_type="text/plain")
+
+
 # Exceptions
 @app.exception_handler(StartletteHTTPException)
 async def general_http_exception_handler(
