@@ -220,7 +220,7 @@ async def rss_feed(db: Annotated[AsyncSession, Depends(get_db)]):
         .order_by(models.Post.date_posted.desc())
         .limit(20),
     )
-    posts = result.scalars.all()
+    posts = result.scalars().all()
 
     items = ""
     for post in posts:
