@@ -248,6 +248,37 @@ async def rss_feed(db: Annotated[AsyncSession, Depends(get_db)]):
     return Response(content=xml, media_type="application/xml")
 
 
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap(db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(models.Post).order_by(models.Post.date_posted.desc())
+    )
+    posts = result.scalars().all()
+
+    urls = f"""
+    <url>
+        <loc>{settings.frontend_url}</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>"""
+
+    for post in posts:
+        urls += f"""
+    <url>
+        <loc>{settings.frontend_url}/posts/{post.id}</loc>
+        <lastmod>{post.date_posted.strftime("%Y-%m-%d")}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>"""
+
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {urls}
+</urlset>"""
+
+    return Response(content=xml, media_type="application/xml")
+
+
 # Exceptions
 @app.exception_handler(StartletteHTTPException)
 async def general_http_exception_handler(
