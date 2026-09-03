@@ -21,6 +21,7 @@ from fastapi_cache.decorator import cache
 from redis import asyncio as aioredis
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from fastapi.responses import Response
 
 import models
 from config import settings
@@ -209,6 +210,42 @@ async def reset_password_page(request: Request):
     )
     response.headers["Referrer-Policy"] = "no-referrer"
     return response
+
+
+@app.get("/feed.xml", include_in_schema=False)
+async def rss_feed(db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(models.Post)
+        .options(selectinload(models.Post.author))
+        .order_by(models.Post.date_posted.desc())
+        .limit(20),
+    )
+    posts = result.scalars.all()
+
+    items = ""
+    for post in posts:
+        url = f"{settings.frontend_url}/posts/{post.id}"
+        items += f"""
+        <item>
+            <title>{post.title}</title>
+            <link>{url}</link>
+            <guid>{url}</guid>
+            <pubDate>{post.date_posted.strftime("%a, %d %b %Y %H:%M:%S +0000")}</pubDate>
+            <author>{post.author.username}</author>
+            <description>{post.content[:200]}</description>
+        </item>"""
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Caner Ören Blog</title>
+        <link>{settings.frontend_url}</link>
+        <description>Latest posts</description>
+        <language>tr</language>
+        {items}
+    </channel>
+</rss>"""
+
+    return Response(content=xml, media_type="application/xml")
 
 
 # Exceptions
